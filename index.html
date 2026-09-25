@@ -143,25 +143,51 @@ let sb=null,user=null,rows=[];
 
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 async function init(){
-  const c=await fetch("/api/config",{cache:"no-store"}).then(r=>r.json());
-  if(!c.url||!c.anonKey){document.getElementById("loginMsg").textContent="Supabase configuration missing on Vercel.";return}
-  sb=supabase.createClient(c.url,c.anonKey);
-  user=(await sb.auth.getSession()).data.session?.user||null;
-  if(!user){document.getElementById("login").style.display="flex";return}
-  await start();
-  sb.auth.onAuthStateChange(async(_,session)=>{user=session?.user||null;if(user)await start();else location.reload()});
+  const loginMsg = document.getElementById("loginMsg");
+  try {
+    const res = await fetch("/api/config", {cache: "no-store"});
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      if (loginMsg) loginMsg.textContent = err?.error || "Supabase environment variables (SUPABASE_URL, SUPABASE_ANON_KEY) are not set on Vercel.";
+      return;
+    }
+    const c = await res.json();
+    if (!c.url || !c.anonKey) {
+      if (loginMsg) loginMsg.textContent = "Supabase configuration missing on Vercel.";
+      return;
+    }
+    sb = supabase.createClient(c.url, c.anonKey);
+    const sessionRes = await sb.auth.getSession();
+    user = sessionRes.data.session?.user || null;
+    if (!user) {
+      const loginModal = document.getElementById("login");
+      if (loginModal) loginModal.style.display = "flex";
+      return;
+    }
+    await start();
+    sb.auth.onAuthStateChange(async (_, session) => {
+      user = session?.user || null;
+      if (user) await start();
+      else location.reload();
+    });
+  } catch (err) {
+    console.error("Dashboard init error:", err);
+    if (loginMsg) loginMsg.textContent = "Error connecting to backend: " + err.message;
+  }
 }
 async function login(){
-  if(!sb){document.getElementById("loginMsg").textContent="Still connecting…";return}
+  const loginMsg = document.getElementById("loginMsg");
+  if(!sb){if (loginMsg) loginMsg.textContent="Connecting to server...";return}
   const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
-  if(password.length<6){document.getElementById("loginMsg").textContent="Password must be at least 6 characters.";return}
+  if(password.length<6){if (loginMsg) loginMsg.textContent="Password must be at least 6 characters.";return}
   let r=await sb.auth.signInWithPassword({email,password});
   if(r.error) r=await sb.auth.signUp({email,password});
-  document.getElementById("loginMsg").textContent=r.error?("Error: "+r.error.message):"Account created/logged in. Check email if confirmation is enabled.";
+  if (loginMsg) loginMsg.textContent=r.error?("Error: "+r.error.message):"Account created/logged in. Check email if confirmation is enabled.";
 }
 async function logout(){if(sb)await sb.auth.signOut()}
 async function start(){
-  document.getElementById("login").style.display="none";
+  const loginModal = document.getElementById("login");
+  if (loginModal) loginModal.style.display="none";
   await loadState();
   renderCourses();
   bindPersonal();
@@ -183,7 +209,9 @@ async function saveState(key,checked,value){
   updateUrgent();
 }
 function renderCourses(){
-  courseGrid.innerHTML=courses.map(([code,name,url])=>{
+  const grid = document.getElementById("courseGrid");
+  if (!grid) return;
+  grid.innerHTML=courses.map(([code,name,url])=>{
     const vals=["downloaded","started","completed","submitted"].map(x=>state(code+"_"+x).checked);
     const pct=Math.round(vals.filter(Boolean).length/4*100);
     const date=state(code+"_date").value;
@@ -200,20 +228,28 @@ function bindPersonal(){
   document.querySelectorAll("[data-value]").forEach(e=>{const k="value_"+e.dataset.value;e.value=state(k).value;e.onchange=()=>saveState(k,false,e.value)});
 }
 function updateUrgent(){
+  const urgentEl = document.getElementById("urgent");
+  if (!urgentEl) return;
   const submitted=courses.filter(([c])=>state(c+"_submitted").checked).length;
-  urgent.textContent=submitted<5?`Assignments: ${submitted}/5 marked submitted. Keep the 31 October 2026 assignment deadline and 30 September 2026 TEE form deadline under review.`:"All five assignments are marked submitted. Continue monitoring TEE, practical/counselling and official notices.";
+  urgentEl.textContent=submitted<5?`Assignments: ${submitted}/5 marked submitted. Keep the 31 October 2026 assignment deadline and 30 September 2026 TEE form deadline under review.`:"All five assignments are marked submitted. Continue monitoring TEE, practical/counselling and official notices.";
 }
 function updateDeadline(){
+  const daysLeftEl = document.getElementById("daysLeft");
+  const deadlineBarEl = document.getElementById("deadlineBar");
   const now=new Date(),due=new Date("2026-10-31T23:59:59+05:30"),start=new Date("2026-07-01T00:00:00+05:30");
-  const days=Math.max(0,Math.ceil((due-now)/86400000));daysLeft.textContent=days+" days remaining";
-  const pct=Math.max(0,Math.min(100,100-((now-start)/(due-start))*100));deadlineBar.style.width=pct+"%";
+  const days=Math.max(0,Math.ceil((due-now)/86400000));
+  if (daysLeftEl) daysLeftEl.textContent=days+" days remaining";
+  const pct=Math.max(0,Math.min(100,100-((now-start)/(due-start))*100));
+  if (deadlineBarEl) deadlineBarEl.style.width=pct+"%";
 }
 async function renderNotifications(){
+  const noticeListEl = document.getElementById("noticeList");
+  if (!noticeListEl) return;
   const [n,r]=await Promise.all([sb.from("notifications").select("*").order("detected_at",{ascending:false}).limit(20),sb.from("notification_reads").select("notification_id").eq("user_id",user.id)]);
   const read=new Set((r.data||[]).map(x=>x.notification_id));
-  if(n.error){noticeList.innerHTML='<div class="notification">Notification table is not ready yet. Run supabase/schema.sql.</div>';return}
-  if(!n.data?.length){noticeList.innerHTML='<div class="notification">No notices collected yet. The daily Vercel job will populate this panel.</div>';return}
-  noticeList.innerHTML=n.data.map(x=>`<div class="notification ${read.has(x.id)?"":"unread"}"><b>${esc(x.title)}</b><div class="muted">${esc(x.source)} · ${new Date(x.detected_at).toLocaleString("en-IN")}</div>${(x.matched_courses||[]).map(c=>`<span class="notice-course">${esc(c)}</span>`).join("")}<br><a target="_blank" href="${encodeURI(x.url)}">Open official source ↗</a> ${read.has(x.id)?"<span class='muted'>· Read</span>":`<button class="btn" onclick="markRead('${x.id}')">MARK READ</button>`}</div>`).join("");
+  if(n.error){noticeListEl.innerHTML='<div class="notification">Notification table is not ready yet. Run supabase/schema.sql in your Supabase SQL Editor.</div>';return}
+  if(!n.data?.length){noticeListEl.innerHTML='<div class="notification">No notices collected yet. The daily Vercel cron will populate this panel.</div>';return}
+  noticeListEl.innerHTML=n.data.map(x=>`<div class="notification ${read.has(x.id)?"":"unread"}"><b>${esc(x.title)}</b><div class="muted">${esc(x.source)} · ${new Date(x.detected_at).toLocaleString("en-IN")}</div>${(x.matched_courses||[]).map(c=>`<span class="notice-course">${esc(c)}</span>`).join("")}<br><a target="_blank" href="${encodeURI(x.url)}">Open official source ↗</a> ${read.has(x.id)?"<span class='muted'>· Read</span>":`<button class="btn" onclick="markRead('${x.id}')">MARK READ</button>`}</div>`).join("");
 }
 async function markRead(id){await sb.from("notification_reads").upsert({user_id:user.id,notification_id:id,read_at:new Date().toISOString()});await renderNotifications()}
 init();

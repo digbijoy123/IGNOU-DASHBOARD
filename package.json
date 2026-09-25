@@ -2,8 +2,13 @@
   "name": "ignou-dashboard",
   "private": true,
   "version": "5.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
   "engines": {
-    "node": "24.x"
+    "node": ">=20.x"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0"
