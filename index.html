@@ -144,24 +144,24 @@ let sb=null,user=null,rows=[];
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 async function init(){
   const c=await fetch("/api/config",{cache:"no-store"}).then(r=>r.json());
-  if(!c.url||!c.anonKey){loginMsg.textContent="Supabase configuration missing on Vercel.";return}
+  if(!c.url||!c.anonKey){document.getElementById("loginMsg").textContent="Supabase configuration missing on Vercel.";return}
   sb=supabase.createClient(c.url,c.anonKey);
   user=(await sb.auth.getSession()).data.session?.user||null;
-  if(!user){login.style.display="flex";return}
+  if(!user){document.getElementById("login").style.display="flex";return}
   await start();
   sb.auth.onAuthStateChange(async(_,session)=>{user=session?.user||null;if(user)await start();else location.reload()});
 }
 async function login(){
-  if(!sb){loginMsg.textContent="Still connecting…";return}
+  if(!sb){document.getElementById("loginMsg").textContent="Still connecting…";return}
   const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
-  if(password.length<6){loginMsg.textContent="Password must be at least 6 characters.";return}
+  if(password.length<6){document.getElementById("loginMsg").textContent="Password must be at least 6 characters.";return}
   let r=await sb.auth.signInWithPassword({email,password});
   if(r.error) r=await sb.auth.signUp({email,password});
-  loginMsg.textContent=r.error?("Error: "+r.error.message):"Account created/logged in. Check email if confirmation is enabled.";
+  document.getElementById("loginMsg").textContent=r.error?("Error: "+r.error.message):"Account created/logged in. Check email if confirmation is enabled.";
 }
 async function logout(){if(sb)await sb.auth.signOut()}
 async function start(){
-  login.style.display="none";
+  document.getElementById("login").style.display="none";
   await loadState();
   renderCourses();
   bindPersonal();
