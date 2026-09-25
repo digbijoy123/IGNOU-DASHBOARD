@@ -2,7 +2,8 @@ export default function handler(req, res) {
   // Set cache headers so clients always fetch fresh configuration
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
-  const url = process.env.SUPABASE_URL || '';
+  let rawUrl = process.env.SUPABASE_URL || '';
+  const url = rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
   const anonKey = process.env.SUPABASE_ANON_KEY || '';
 
   if (!url || !anonKey) {

@@ -156,7 +156,8 @@ async function init(){
       if (loginMsg) loginMsg.textContent = "Supabase configuration missing on Vercel.";
       return;
     }
-    sb = supabase.createClient(c.url, c.anonKey);
+    const cleanUrl = (c.url || '').replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+    sb = supabase.createClient(cleanUrl, c.anonKey);
     const sessionRes = await sb.auth.getSession();
     user = sessionRes.data.session?.user || null;
     if (!user) {
