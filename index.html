@@ -4,47 +4,74 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IGNOU BCA — Full Control Centre</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f7f1df;--paper:#fffdf5;--ink:#111;--yellow:#ffd43b;--pink:#ff6b9d;--blue:#67d5ff;--green:#7bea8a;--red:#ff6262;--border:3px solid #111;--shadow:7px 7px 0 #111}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
-.wrap{max-width:1180px;margin:auto;padding:0 18px}header{background:var(--yellow);border-bottom:var(--border);padding:22px 0}
-.headerbox{display:flex;justify-content:space-between;gap:20px;align-items:end}h1{font-size:clamp(30px,5vw,52px);line-height:.9;margin:8px 0;font-weight:1000;letter-spacing:-2px}
-header p{margin:8px 0 0;font-weight:800}.date{font-size:12px;border:var(--border);background:var(--paper);padding:7px 9px;box-shadow:4px 4px #111;display:inline-block}
-.nav{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}.nav a{color:#111;text-decoration:none;border:2px solid #111;background:#fff;padding:8px 10px;font-weight:1000;box-shadow:3px 3px #111}.nav a:hover{background:var(--blue)}
-main{padding:24px 0 50px}.section-title{display:inline-block;background:#111;color:#fff;padding:8px 12px;margin:12px 0 14px;font-size:18px;font-weight:1000;transform:rotate(-1deg)}
-.alert{border:var(--border);box-shadow:var(--shadow);padding:16px;margin-bottom:24px;font-weight:800;background:var(--pink)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card{background:var(--paper);border:var(--border);box-shadow:var(--shadow);padding:18px}.card:nth-child(2n){transform:rotate(.3deg)}.card:nth-child(3n){transform:rotate(-.3deg)}
-.card h2{font-size:20px;margin:0 0 12px;font-weight:1000}.item{display:block;color:#111;text-decoration:none;border-top:2px solid #111;padding:12px 0;font-weight:900}.item:hover{background:var(--blue);margin:0 -8px;padding-left:8px}.item small{display:block;font-weight:600;margin-top:4px}
-.details{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.detail{border:2px solid #111;background:white;padding:12px}.label{font-size:10px;font-weight:1000;text-transform:uppercase}.value{font-size:16px;font-weight:900;margin-top:4px;word-break:break-word}
-.id-layout{display:grid;grid-template-columns:minmax(280px,1fr) minmax(260px,420px);gap:20px;align-items:start}.id-card{background:white;border:var(--border);box-shadow:var(--shadow);padding:10px}.id-card img{display:block;width:100%;height:auto;border:2px solid #111}
-.note{border:var(--border);padding:14px;font-weight:800;background:var(--green)}.warning{background:var(--red)}.info{background:var(--blue)}
-table{width:100%;border-collapse:collapse;background:white;border:2px solid #111}th,td{border:2px solid #111;padding:10px;text-align:left}th{background:var(--yellow);font-weight:1000}
-.status{display:inline-block;border:2px solid #111;padding:3px 7px;font-size:11px;font-weight:1000;background:#eee}.unknown{background:var(--red)}.todo{background:var(--yellow)}.done{background:var(--green)}
-.task{display:flex;gap:10px;align-items:flex-start;border-top:2px solid #111;padding:11px 0;font-weight:800}.task input{width:18px;height:18px;accent-color:#111;flex:0 0 auto}
-.course-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.bar{height:18px;border:2px solid #111;background:#fff;margin-top:8px}.bar>span{display:block;height:100%;width:0;background:#111}
-.mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}.mini{border:2px solid #111;background:#fff;padding:10px}.mini b{display:block}.muted{font-size:12px;font-weight:700}
-.quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0}.quick a{display:block;text-decoration:none;color:#111;border:var(--border);background:var(--paper);box-shadow:5px 5px #111;padding:14px;font-weight:1000}.quick a:hover{background:var(--green)}
-footer{text-align:center;font-weight:700;padding:30px 18px}@media(max-width:700px){.headerbox,.id-layout{display:block}.date{margin-top:10px}.card{transform:none!important}.mini-grid{grid-template-columns:1fr}}
+.wrap{max-width:1200px;margin:auto;padding:0 18px}header{background:var(--yellow);border-bottom:var(--border);padding:22px 0}.headerbox{display:flex;justify-content:space-between;gap:20px;align-items:end}h1{font-size:clamp(30px,5vw,52px);line-height:.9;margin:8px 0;font-weight:1000;letter-spacing:-2px}header p{margin:8px 0 0;font-weight:800}.date{font-size:12px;border:var(--border);background:var(--paper);padding:7px 9px;box-shadow:4px 4px #111;display:inline-block}
+.nav{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}.nav a,.nav button{color:#111;text-decoration:none;border:2px solid #111;background:#fff;padding:8px 10px;font-weight:1000;box-shadow:3px 3px #111;cursor:pointer}
+main{padding:24px 0 50px}.panel,.card{background:var(--paper);border:var(--border);box-shadow:var(--shadow);padding:18px;margin-bottom:18px}.section-title{display:inline-block;background:#111;color:#fff;padding:8px 12px;margin:12px 0 14px;font-size:18px;font-weight:1000;transform:rotate(-1deg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}.details{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.detail{border:2px solid #111;background:white;padding:12px}.label{font-size:10px;font-weight:1000;text-transform:uppercase}.value{font-size:16px;font-weight:900;margin-top:4px;word-break:break-word}
+.item{display:block;color:#111;text-decoration:none;border-top:2px solid #111;padding:12px 0;font-weight:900}.item:hover{background:var(--blue)}.note{border:2px solid #111;padding:12px;margin:8px 0;background:#fffbe6}.warning{background:#ffb4b4}.info{background:var(--blue)}.success{background:var(--green)}
+table{width:100%;border-collapse:collapse;background:#fff;border:2px solid #111}th,td{border:2px solid #111;padding:10px;text-align:left}th{background:var(--yellow);font-weight:1000}
+.task{display:flex;gap:10px;align-items:flex-start;border-top:2px solid #111;padding:11px 0;font-weight:800}.task input{width:18px;height:18px;flex:0 0 auto}.course-head{display:flex;justify-content:space-between;gap:12px}.status{display:inline-block;border:2px solid #111;padding:3px 7px;font-size:11px;font-weight:1000;background:#eee}.todo{background:var(--yellow)}.done{background:var(--green)}.unknown{background:var(--red)}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mini{border:2px solid #111;background:#fff;padding:10px}.mini input,.editor input,.editor textarea{width:100%;padding:9px;border:2px solid #111;margin-top:6px}.muted{font-size:12px;font-weight:700;color:#555}.btn{border:3px solid #111;background:var(--yellow);padding:9px 14px;font-weight:900;cursor:pointer}.btn:hover{transform:translate(-1px,-1px)}
+.cloud-login{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}.cloud-box{max-width:460px;width:100%;background:var(--paper);border:var(--border);box-shadow:var(--shadow);padding:24px}.cloud-box input{width:100%;padding:11px;border:2px solid #111;margin:6px 0 12px}
+#notifications{background:var(--blue)}.notification{background:#fff;border:2px solid #111;padding:12px;margin:9px 0}.notification.unread{background:#fffbe6}.notification button{margin-top:8px}.notice-course{display:inline-block;border:2px solid #111;padding:3px 6px;margin:5px 4px 0 0;font-size:11px;font-weight:900;background:var(--yellow)}
+.bar{height:18px;border:2px solid #111;background:#fff;margin-top:8px}.bar span{display:block;height:100%;background:#111;width:0}
+.id-card img{display:block;width:100%;max-width:700px;height:auto;border:2px solid #111}.footer{text-align:center;padding:30px;font-weight:700}
+@media(max-width:700px){.headerbox{display:block}.mini-grid{grid-template-columns:1fr}.card{box-shadow:4px 4px #111}}
 </style>
 </head>
 <body>
-<header><div class="wrap headerbox"><div style="width:100%"><div class="date">25 SEPTEMBER 2026</div><h1>IGNOU BCA<br>FULL CONTROL CENTRE</h1><p>BCA_NEW · July 2026 · RC Guwahati · LSC 0400</p><nav class="nav">
-<a href="#today">TODAY</a><a href="#details">MY DETAILS</a><a href="#courses">COURSES</a><a href="#assignments">ASSIGNMENTS</a><a href="#tee">TEE</a><a href="#practical">PRACTICAL</a><a href="#sources">SOURCES</a>
-</nav></div></div></header>
+
+<div id="login" class="cloud-login">
+  <div class="cloud-box">
+    <div class="date">CLOUD-SYNCED DASHBOARD</div>
+    <h1>IGNOU BCA<br>CLOUD</h1>
+    <p><b>Your checkboxes, dates and personal progress are stored in Supabase.</b></p>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password (6+ characters)">
+    <button class="btn" onclick="login()">SIGN IN / CREATE ACCOUNT</button>
+    <p id="loginMsg" class="muted"></p>
+  </div>
+</div>
+
+<header>
+<div class="wrap headerbox">
+<div>
+<div class="date">25 SEPTEMBER 2026</div>
+<h1>IGNOU BCA<br>FULL CONTROL CENTRE</h1>
+<p>BCA_NEW · July 2026 · RC Guwahati · LSC 0400</p>
+<nav class="nav">
+<a href="#notifications">🔔 NOTIFICATIONS</a><a href="#details">MY DETAILS</a><a href="#assignments">ASSIGNMENTS</a><a href="#tee">TEE</a><a href="#practical">PRACTICAL</a><a href="#sources">SOURCES</a>
+<button onclick="logout()">CLOUD LOG OUT</button>
+</nav>
+</div>
+</div>
+</header>
+
 <main class="wrap">
-<section id="today">
-<div class="alert"><b>🚨 WHAT DO I NEED TO DO NOW?</b><br><span id="urgentText">Loading current priorities…</span></div>
-<div class="quick">
-<a href="https://www.ignou.ac.in/announcements/0" target="_blank">📢 IGNOU ANNOUNCEMENTS</a>
-<a href="https://ignou.samarth.edu.in/" target="_blank">🎓 SAMARTH</a>
-<a href="https://exam.ignou.ac.in/" target="_blank">📝 TEE EXAM PORTAL</a>
-<a href="https://rcguwahati.ignou.ac.in/" target="_blank">🏫 RC GUWAHATI</a>
-<a href="https://egyankosh.ac.in/" target="_blank">📚 eGYANKOSH</a>
+<section id="notifications" class="panel">
+<h2>🔔 DAILY IGNOU NOTIFICATIONS</h2>
+<p class="muted">Only notices detected from public IGNOU / RC Guwahati sources are shown here. Official student data is locked.</p>
+<div id="noticeList"><div class="notification">Loading notifications…</div></div>
+</section>
+
+<section class="panel">
+<div class="note warning"><b>🚨 WHAT DO I NEED TO DO NOW?</b><br><span id="urgent">Loading your priorities…</span></div>
+<div class="grid">
+<a class="item" target="_blank" href="https://www.ignou.ac.in/announcements/0">📢 IGNOU Announcements</a>
+<a class="item" target="_blank" href="https://ignou.samarth.edu.in/">🎓 Samarth</a>
+<a class="item" target="_blank" href="https://exam.ignou.ac.in/">📝 TEE Exam Portal</a>
+<a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/">🏫 RC Guwahati</a>
+<a class="item" target="_blank" href="https://egyankosh.ac.in/">📚 eGyanKosh</a>
 </div>
 </section>
 
-<div class="section-title" id="details">👤 MY IGNOU DETAILS</div>
-<section class="card"><div class="details">
+<div class="section-title" id="details">👤 OFFICIAL IGNOU DETAILS — LOCKED</div>
+<section class="panel">
+<div class="details">
 <div class="detail"><div class="label">Name</div><div class="value">DIGBIJOY DAS</div></div>
 <div class="detail"><div class="label">Enrolment Number</div><div class="value">2650982050</div></div>
 <div class="detail"><div class="label">Programme</div><div class="value">BCA_NEW — Bachelor of Computer Applications</div></div>
@@ -58,106 +85,138 @@ footer{text-align:center;font-weight:700;padding:30px 18px}@media(max-width:700p
 <div class="detail"><div class="label">Study Material</div><div class="value">Physical Books — received</div></div>
 <div class="detail"><div class="label">Registration Number</div><div class="value"><span class="status unknown">NOT SEPARATELY SHOWN</span></div></div>
 </div>
-<p style="margin-top:16px"><a class="item" target="_blank" href="https://isms.ignou.ac.in/changeadmdata/AdmissionStatusNew.ASP">🔎 Open IGNOU Admission/Registration Details<small>Verify your current admission, course registration and study-centre information.</small></a></p>
 </section>
 
-<div class="id-layout" style="margin-top:26px">
-<div><div class="section-title">🪪 MY ID CARD</div><div class="id-card"><img src="ignou-student-id-card.png" alt="IGNOU Student Identity Card"></div></div>
-<div><div class="section-title">🔐 DOCUMENT NOTE</div><div class="note warning">This ID card is intentionally visible because you requested it. A public Vercel deployment may expose everything shown here to anyone with the URL.</div></div>
-</div>
+<div class="section-title">🪪 MY ID CARD</div>
+<section class="panel id-card">
+<img src="ignou-student-id-card.png" alt="IGNOU Student ID Card">
+<p class="muted">You requested the ID card to remain visible on the public deployment.</p>
+</section>
 
-<div class="section-title" id="courses">📚 MY SEMESTER 1</div>
-<section class="card"><table>
-<thead><tr><th>Code</th><th>Course</th><th>Credits</th><th>Type</th><th>Assignment</th><th>TEE</th></tr></thead>
-<tbody>
-<tr><td><b>BCS111</b></td><td>Computer Basics and PC Software</td><td>4</td><td>Compulsory</td><td><span class="status todo">TRACK BELOW</span></td><td><span class="status unknown">VERIFY</span></td></tr>
-<tr><td><b>BCS12</b></td><td>Mathematics / Basic Mathematics</td><td>4</td><td>Compulsory</td><td><span class="status todo">TRACK BELOW</span></td><td><span class="status unknown">VERIFY</span></td></tr>
-<tr><td><b>BCSL13</b></td><td>Computer Basics and PC Software Lab</td><td>2</td><td>Compulsory</td><td><span class="status todo">TRACK BELOW</span></td><td><span class="status unknown">VERIFY</span></td></tr>
-<tr><td><b>BEGLA136</b></td><td>English at the Work Place</td><td>6</td><td>Compulsory</td><td><span class="status todo">TRACK BELOW</span></td><td><span class="status unknown">VERIFY</span></td></tr>
-<tr><td><b>BEVAE181</b></td><td>Environmental Studies</td><td>4</td><td>Compulsory</td><td><span class="status todo">TRACK BELOW</span></td><td><span class="status unknown">VERIFY</span></td></tr>
-</tbody></table><p><b>Total registered credits: 20</b> · Course list from your Samarth Programme page.</p></section>
+<div class="section-title">📚 SEMESTER 1 — 20 CREDITS</div>
+<section class="panel">
+<table><thead><tr><th>Code</th><th>Course</th><th>Credits</th><th>Assignment</th></tr></thead><tbody>
+<tr><td>BCS111</td><td>Computer Basics and PC Software</td><td>4</td><td>31 Oct 2026</td></tr>
+<tr><td>BCS12 / BCS-012</td><td>Basic Mathematics</td><td>4</td><td>31 Oct 2026</td></tr>
+<tr><td>BCSL13 / BCSL-013</td><td>Computer Basics and PC Software Lab</td><td>2</td><td>31 Oct 2026</td></tr>
+<tr><td>BEGLA136 / BEGLA-136</td><td>English at the Work Place</td><td>6</td><td>31 Oct 2026</td></tr>
+<tr><td>BEVAE181 / BEVAE-181</td><td>Environmental Studies</td><td>4</td><td>31 Oct 2026</td></tr></tbody></table>
+</section>
 
-<div class="section-title" id="assignments">📝 ASSIGNMENT CONTROL</div>
-<section class="card" style="margin-bottom:18px"><div class="note warning"><b>JULY 2026 SESSION — DEADLINE: 31 OCTOBER 2026</b><br><span id="daysLeft">36 days remaining</span> · Submit to your Study Centre Coordinator according to the official assignment instructions. Keep submission proof/receipt. Assignment viva-voce requirements apply.</div><div class="bar"><span id="deadlineBar"></span></div></section>
+<div class="section-title" id="assignments">📝 ASSIGNMENT CONTROL — PERSONAL DATA ONLY</div>
+<section class="panel">
+<div class="note warning"><b>JULY 2026 SESSION — DEADLINE: 31 OCTOBER 2026</b><br><span id="daysLeft"></span></div>
+<div class="bar"><span id="deadlineBar"></span></div>
+</section>
+<div id="courseGrid" class="grid"></div>
+
+<div class="section-title" id="tee">📝 DECEMBER 2026 TEE</div>
 <section class="grid">
-
-<div class="card course-card" data-course="BCS111"><div class="course-head"><h2>BCS111</h2><span class="status todo" id="pct-BCS111">0%</span></div><p><b>Computer Basics and PC Software</b></p><a class="item" target="_blank" href="https://www.ignou.ac.in/viewFile/SOCIS/assignments/BCS-111-BCA-NEW-2026-27.pdf">⬇ Download Assignment PDF</a><div class="task"><input data-task="BCS111-downloaded" type="checkbox"> Downloaded</div><div class="task"><input data-task="BCS111-started" type="checkbox"> Started</div><div class="task"><input data-task="BCS111-completed" type="checkbox"> Completed</div><div class="task"><input data-task="BCS111-submitted" type="checkbox"> Submitted</div><div class="mini-grid"><div class="mini"><b>Submission date</b><input data-date="BCS111" type="date" style="width:100%;margin-top:6px"></div><div class="mini"><b>Proof kept</b><label class="muted"><input data-proof="BCS111" type="checkbox"> Receipt / photo / copy</label></div></div></div>
-
-<div class="card course-card" data-course="BCS12"><div class="course-head"><h2>BCS12 / BCS-012</h2><span class="status todo" id="pct-BCS12">0%</span></div><p><b>Basic Mathematics</b></p><a class="item" target="_blank" href="https://www.ignou.ac.in/viewFile/SOCIS/assignments/BCS-012-BCA-NEW-2026-27.pdf">⬇ Download Assignment PDF</a><div class="task"><input data-task="BCS12-downloaded" type="checkbox"> Downloaded</div><div class="task"><input data-task="BCS12-started" type="checkbox"> Started</div><div class="task"><input data-task="BCS12-completed" type="checkbox"> Completed</div><div class="task"><input data-task="BCS12-submitted" type="checkbox"> Submitted</div><div class="mini-grid"><div class="mini"><b>Submission date</b><input data-date="BCS12" type="date" style="width:100%;margin-top:6px"></div><div class="mini"><b>Proof kept</b><label class="muted"><input data-proof="BCS12" type="checkbox"> Receipt / photo / copy</label></div></div></div>
-
-<div class="card course-card" data-course="BCSL13"><div class="course-head"><h2>BCSL13 / BCSL-013</h2><span class="status todo" id="pct-BCSL13">0%</span></div><p><b>Computer Basics and PC Software Lab</b></p><a class="item" target="_blank" href="https://www.ignou.ac.in/viewFile/SOCIS/assignments/BCSL-013-BCA-NEW-2026-27.pdf">⬇ Download Assignment PDF</a><div class="task"><input data-task="BCSL13-downloaded" type="checkbox"> Downloaded</div><div class="task"><input data-task="BCSL13-started" type="checkbox"> Started</div><div class="task"><input data-task="BCSL13-completed" type="checkbox"> Completed</div><div class="task"><input data-task="BCSL13-submitted" type="checkbox"> Submitted</div><div class="mini-grid"><div class="mini"><b>Submission date</b><input data-date="BCSL13" type="date" style="width:100%;margin-top:6px"></div><div class="mini"><b>Proof kept</b><label class="muted"><input data-proof="BCSL13" type="checkbox"> Receipt / photo / copy</label></div></div></div>
-
-<div class="card course-card" data-course="BEGLA136"><div class="course-head"><h2>BEGLA136 / BEGLA-136</h2><span class="status todo" id="pct-BEGLA136">0%</span></div><p><b>English at the Work Place</b></p><a class="item" target="_blank" href="https://www.ignou.ac.in/viewFile/SOCIS/assignments/BEGLA-136-BCA-NEW-2026-27.pdf">⬇ Download Assignment PDF</a><div class="task"><input data-task="BEGLA136-downloaded" type="checkbox"> Downloaded</div><div class="task"><input data-task="BEGLA136-started" type="checkbox"> Started</div><div class="task"><input data-task="BEGLA136-completed" type="checkbox"> Completed</div><div class="task"><input data-task="BEGLA136-submitted" type="checkbox"> Submitted</div><div class="mini-grid"><div class="mini"><b>Submission date</b><input data-date="BEGLA136" type="date" style="width:100%;margin-top:6px"></div><div class="mini"><b>Proof kept</b><label class="muted"><input data-proof="BEGLA136" type="checkbox"> Receipt / photo / copy</label></div></div></div>
-
-<div class="card course-card" data-course="BEVAE181"><div class="course-head"><h2>BEVAE181 / BEVAE-181</h2><span class="status todo" id="pct-BEVAE181">0%</span></div><p><b>Environmental Studies</b></p><a class="item" target="_blank" href="https://www.ignou.ac.in/viewFile/SOCIS/assignments/BEVAE-181-BCA-NEW-2026-27.pdf">⬇ Download Assignment PDF</a><div class="task"><input data-task="BEVAE181-downloaded" type="checkbox"> Downloaded</div><div class="task"><input data-task="BEVAE181-started" type="checkbox"> Started</div><div class="task"><input data-task="BEVAE181-completed" type="checkbox"> Completed</div><div class="task"><input data-task="BEVAE181-submitted" type="checkbox"> Submitted</div><div class="mini-grid"><div class="mini"><b>Submission date</b><input data-date="BEVAE181" type="date" style="width:100%;margin-top:6px"></div><div class="mini"><b>Proof kept</b><label class="muted"><input data-proof="BEVAE181" type="checkbox"> Receipt / photo / copy</label></div></div></div>
+<div class="panel"><h2>TEE Form</h2><div class="note warning"><b>30 SEPTEMBER 2026</b><br>Verify eligibility in the official exam portal before payment.</div><a class="item" target="_blank" href="https://exam.ignou.ac.in/">Open Official Exam Portal</a><label class="task"><input data-check="tee_form"> I have checked my TEE form status</label></div>
+<div class="panel"><h2>Grade Card</h2><a class="item" target="_blank" href="https://gradecard.ignou.ac.in/">Open Grade Card</a><a class="item" target="_blank" href="https://www.ignou.ac.in/pages/7">Open Results</a></div>
 </section>
 
 <div class="section-title" id="practical">🧪 PRACTICAL + COUNSELLING</div>
 <section class="grid">
-<div class="card"><h2>BCSL13 Practical</h2><p><span class="status unknown">SCHEDULE UNKNOWN</span></p><p>Attendance and assignment conditions apply to practical-exam eligibility. Do not enter a date until RC/LSC publishes it.</p><a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/">🏫 Check RC Guwahati</a></div>
-<div class="card"><h2>🏫 Counselling / Classes</h2><p><span class="status unknown">SCHEDULE UNKNOWN</span></p><p>Record course, date, time, venue/link and attendance once an official schedule is published.</p><a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/">📢 Check RC Guwahati Notices</a></div>
-<div class="card"><h2>📍 Study Centre 0400</h2><p><b>Regional Centre, TLC</b></p><p>Official active centre list confirms BCA is activated at LSC 0400.</p><a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/Ignou-RC-Guwahati/userfiles/file/SCLIST.pdf">🔎 Open Official LSC List</a></div>
-</section>
-
-<div class="section-title" id="tee">📝 DECEMBER 2026 TEE</div>
-<section class="grid">
-<div class="card"><h2>TEE Form</h2><div class="note warning"><b>30 SEPTEMBER 2026</b><br>Current dashboard reminder: verify the official exam notice and your eligibility before paying.</div><p><b>Do not treat this card as proof of eligibility.</b> Verify your course registration/exam status in the official portal.</p><a class="item" target="_blank" href="https://exam.ignou.ac.in/">Open Official Exam Portal</a></div>
-<div class="card"><h2>Grade Card</h2><p><span class="status unknown">NOT YET POPULATED</span></p><a class="item" target="_blank" href="https://gradecard.ignou.ac.in/">Open Grade Card</a><a class="item" target="_blank" href="https://www.ignou.ac.in/pages/7">Open Results</a></div>
-<div class="card"><h2>Re-registration</h2><p><span class="status unknown">LATER</span></p><a class="item" target="_blank" href="https://onlinerr.ignou.ac.in/">IGNOU Re-registration</a></div>
+<div class="panel"><h2>BCSL13 Practical</h2><span class="status unknown">SCHEDULE UNKNOWN</span><p>Wait for an official RC/LSC schedule.</p><a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/">Check RC Guwahati</a><label class="task"><input data-check="practical"> I have checked RC/practical notices</label></div>
+<div class="panel"><h2>🏫 Counselling</h2><span class="status unknown">SCHEDULE UNKNOWN</span><p>Record personal notes only after an official schedule is published.</p><textarea data-value="counselling_note" placeholder="Your personal counselling note"></textarea></div>
 </section>
 
 <div class="section-title" id="sources">📢 OFFICIAL SOURCES</div>
 <section class="grid">
-<div class="card"><h2>IGNOU HQ</h2><a class="item" target="_blank" href="https://www.ignou.ac.in/">Main Website</a><a class="item" target="_blank" href="https://www.ignou.ac.in/announcements/0">Announcements</a><a class="item" target="_blank" href="https://ignou.samarth.edu.in/">Samarth Student Portal</a><a class="item" target="_blank" href="https://www.ignou.ac.in/pages/54">Student Services / Downloads</a><a class="item" target="_blank" href="https://www.ignou.ac.in/pages/43">Current Assignments</a></div>
-<div class="card"><h2>🏫 RC Guwahati</h2><a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/">RC Guwahati</a><a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/Ignou-RC-Guwahati/userfiles/file/SCLIST.pdf">Official Active LSC List</a></div>
-<div class="card"><h2>📚 Study</h2><a class="item" target="_blank" href="https://egyankosh.ac.in/">eGyanKosh</a><a class="item" target="_blank" href="https://www.ignou.ac.in/viewFile/SOCIS/programmeguide/BCA_NEW-May-2026.pdf">BCA_NEW Programme Guide</a><a class="item" target="_blank" href="https://www.ignou.ac.in/pages/60">Previous Question Papers</a></div>
-</section>
-
-<div class="section-title">📁 DOCUMENTS + CHECKLIST</div>
-<section class="grid">
-<div class="card"><h2>My Documents</h2>
-<div class="task"><input data-doc="admission" type="checkbox"> Admission confirmation / offer document</div>
-<div class="task"><input data-doc="fee" type="checkbox"> Fee payment receipt</div>
-<div class="task"><input data-doc="id" type="checkbox"> Student ID card</div>
-<div class="task"><input data-doc="guide" type="checkbox"> Programme guide</div>
-<div class="task"><input data-doc="assignments" type="checkbox"> Assignment PDFs</div>
-<div class="task"><input data-doc="tee" type="checkbox"> TEE documents</div></div>
-<div class="card"><h2>Weekly Control Check</h2>
-<div class="task"><input data-week="ann" type="checkbox"> IGNOU announcements checked</div>
-<div class="task"><input data-week="rc" type="checkbox"> RC Guwahati checked</div>
-<div class="task"><input data-week="ass" type="checkbox"> Assignments checked</div>
-<div class="task"><input data-week="samarth" type="checkbox"> Samarth checked</div>
-<div class="task"><input data-week="deadlines" type="checkbox"> Upcoming deadlines reviewed</div></div>
+<div class="panel"><h2>IGNOU HQ</h2><a class="item" target="_blank" href="https://www.ignou.ac.in/">Main Website</a><a class="item" target="_blank" href="https://www.ignou.ac.in/announcements/0">Announcements</a><a class="item" target="_blank" href="https://www.ignou.ac.in/pages/43">Current Assignments</a><a class="item" target="_blank" href="https://www.ignou.ac.in/pages/54">Student Services</a></div>
+<div class="panel"><h2>🏫 RC Guwahati</h2><a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/">RC Guwahati</a><a class="item" target="_blank" href="https://rcguwahati.ignou.ac.in/Ignou-RC-Guwahati/userfiles/file/SCLIST.pdf">Official LSC List</a></div>
+<div class="panel"><h2>📚 Study</h2><a class="item" target="_blank" href="https://egyankosh.ac.in/">eGyanKosh</a><a class="item" target="_blank" href="https://www.ignou.ac.in/viewFile/SOCIS/programmeguide/BCA_NEW-May-2026.pdf">BCA_NEW Programme Guide</a><a class="item" target="_blank" href="https://www.ignou.ac.in/pages/60">Previous Papers</a></div>
 </section>
 </main>
-<footer>IGNOU BCA Full Control Centre · State is saved locally in this browser. Verify important academic information against official IGNOU notices.</footer>
+<footer class="footer">IGNOU BCA Cloud Command Centre · Personal progress is stored in Supabase. Official information should always be verified against IGNOU.</footer>
 
 <script>
-const STORE='ignou-bca-control-centre-v2';
-function save(k,v){localStorage.setItem(STORE+'::'+k,JSON.stringify(v))}
-function load(k,d){try{let v=localStorage.getItem(STORE+'::'+k);return v===null?d:JSON.parse(v)}catch(e){return d}}
-document.querySelectorAll('input[data-task],input[data-proof],input[data-doc],input[data-week]').forEach(el=>{
- let k=el.dataset.task||('proof-'+el.dataset.proof)||('doc-'+el.dataset.doc)||('week-'+el.dataset.week);
- el.checked=load(k,false);el.addEventListener('change',()=>{save(k,el.checked);updateProgress()})
-});
-document.querySelectorAll('input[data-date]').forEach(el=>{
- let k='date-'+el.dataset.date;el.value=load(k,'');el.addEventListener('change',()=>save(k,el.value))
-});
-function updateProgress(){
- document.querySelectorAll('.course-card').forEach(card=>{
-  let c=card.dataset.course,x=[...card.querySelectorAll('input[data-task]')],n=x.filter(a=>a.checked).length,p=Math.round(n/x.length*100),pill=document.getElementById('pct-'+c);
-  pill.textContent=p+'%';pill.className='status '+(p===100?'done':p===0?'todo':'info')
- });
- let submitted=document.querySelectorAll('input[data-task$="-submitted"]:checked').length;
- document.getElementById('urgentText').textContent=submitted<5?`Focus first on assignments: ${submitted}/5 marked submitted. Keep the 30 September 2026 TEE deadline under review and verify eligibility before paying.`:'All five assignments are marked submitted. Keep TEE, practical, counselling and official notices under control.';
+const courses=[
+["BCS111","Computer Basics and PC Software","https://www.ignou.ac.in/viewFile/SOCIS/assignments/BCS-111-BCA-NEW-2026-27.pdf"],
+["BCS12","Basic Mathematics","https://www.ignou.ac.in/viewFile/SOCIS/assignments/BCS-012-BCA-NEW-2026-27.pdf"],
+["BCSL13","Computer Basics and PC Software Lab","https://www.ignou.ac.in/viewFile/SOCIS/assignments/BCSL-013-BCA-NEW-2026-27.pdf"],
+["BEGLA136","English at the Work Place","https://www.ignou.ac.in/viewFile/SOCIS/assignments/BEGLA-136-BCA-NEW-2026-27.pdf"],
+["BEVAE181","Environmental Studies","https://www.ignou.ac.in/viewFile/SOCIS/assignments/BEVAE-181-BCA-NEW-2026-27.pdf"]
+];
+let sb=null,user=null,rows=[];
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+async function init(){
+  const c=await fetch("/api/config",{cache:"no-store"}).then(r=>r.json());
+  if(!c.url||!c.anonKey){loginMsg.textContent="Supabase configuration missing on Vercel.";return}
+  sb=supabase.createClient(c.url,c.anonKey);
+  user=(await sb.auth.getSession()).data.session?.user||null;
+  if(!user){login.style.display="flex";return}
+  await start();
+  sb.auth.onAuthStateChange(async(_,session)=>{user=session?.user||null;if(user)await start();else location.reload()});
+}
+async function login(){
+  if(!sb){loginMsg.textContent="Still connecting…";return}
+  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
+  if(password.length<6){loginMsg.textContent="Password must be at least 6 characters.";return}
+  let r=await sb.auth.signInWithPassword({email,password});
+  if(r.error) r=await sb.auth.signUp({email,password});
+  loginMsg.textContent=r.error?("Error: "+r.error.message):"Account created/logged in. Check email if confirmation is enabled.";
+}
+async function logout(){if(sb)await sb.auth.signOut()}
+async function start(){
+  login.style.display="none";
+  await loadState();
+  renderCourses();
+  bindPersonal();
+  updateUrgent();
+  updateDeadline();
+  await renderNotifications();
+}
+async function loadState(){
+  const r=await sb.from("user_checklist").select("*").eq("user_id",user.id);
+  rows=r.data||[];
+}
+function state(key){
+  return rows.find(x=>x.item_key===key)||{checked:false,value:""};
+}
+async function saveState(key,checked,value){
+  await sb.from("user_checklist").upsert({user_id:user.id,item_key:key,checked:!!checked,value:value??"",updated_at:new Date().toISOString()});
+  const r=await sb.from("user_checklist").select("*").eq("user_id",user.id);
+  rows=r.data||[];
+  updateUrgent();
+}
+function renderCourses(){
+  courseGrid.innerHTML=courses.map(([code,name,url])=>{
+    const vals=["downloaded","started","completed","submitted"].map(x=>state(code+"_"+x).checked);
+    const pct=Math.round(vals.filter(Boolean).length/4*100);
+    const date=state(code+"_date").value;
+    const proof=state(code+"_proof").checked;
+    return `<section class="panel"><div class="course-head"><h2>${code}</h2><span class="status ${pct===100?"done":"todo"}">${pct}%</span></div><b>${esc(name)}</b>
+    <a class="item" target="_blank" href="${url}">⬇ Download Assignment PDF</a>
+    ${["downloaded","started","completed","submitted"].map(x=>`<label class="task"><input data-personal="${code}_${x}" type="checkbox" ${state(code+"_"+x).checked?"checked":""}> ${x[0].toUpperCase()+x.slice(1)}</label>`).join("")}
+    <div class="mini-grid"><div class="mini"><b>Submission date</b><input data-personal="${code}_date" type="date" value="${esc(date)}"></div><div class="mini"><b>Proof kept</b><label class="task"><input data-personal="${code}_proof" type="checkbox" ${proof?"checked":""}> Receipt / photo / copy</label></div></div></section>`;
+  }).join("");
+}
+function bindPersonal(){
+  document.querySelectorAll("[data-personal]").forEach(e=>e.onchange=()=>saveState(e.dataset.personal,e.type==="checkbox"?e.checked:false,e.type==="checkbox"?"":e.value));
+  document.querySelectorAll("[data-check]").forEach(e=>{const k="check_"+e.dataset.check;e.checked=state(k).checked;e.onchange=()=>saveState(k,e.checked,"")});
+  document.querySelectorAll("[data-value]").forEach(e=>{const k="value_"+e.dataset.value;e.value=state(k).value;e.onchange=()=>saveState(k,false,e.value)});
+}
+function updateUrgent(){
+  const submitted=courses.filter(([c])=>state(c+"_submitted").checked).length;
+  urgent.textContent=submitted<5?`Assignments: ${submitted}/5 marked submitted. Keep the 31 October 2026 assignment deadline and 30 September 2026 TEE form deadline under review.`:"All five assignments are marked submitted. Continue monitoring TEE, practical/counselling and official notices.";
 }
 function updateDeadline(){
- let now=new Date('2026-09-25T10:00:00+05:30'),due=new Date('2026-10-31T23:59:59+05:30'),days=Math.ceil(Math.max(0,due-now)/86400000);
- document.getElementById('daysLeft').textContent=days+' days remaining';
- let start=new Date('2026-07-01T00:00:00+05:30'),total=due-start,elapsed=Math.min(total,Math.max(0,now-start));
- document.getElementById('deadlineBar').style.width=Math.max(0,Math.min(100,100-elapsed/total*100))+'%';
+  const now=new Date(),due=new Date("2026-10-31T23:59:59+05:30"),start=new Date("2026-07-01T00:00:00+05:30");
+  const days=Math.max(0,Math.ceil((due-now)/86400000));daysLeft.textContent=days+" days remaining";
+  const pct=Math.max(0,Math.min(100,100-((now-start)/(due-start))*100));deadlineBar.style.width=pct+"%";
 }
-updateProgress();updateDeadline();
+async function renderNotifications(){
+  const [n,r]=await Promise.all([sb.from("notifications").select("*").order("detected_at",{ascending:false}).limit(20),sb.from("notification_reads").select("notification_id").eq("user_id",user.id)]);
+  const read=new Set((r.data||[]).map(x=>x.notification_id));
+  if(n.error){noticeList.innerHTML='<div class="notification">Notification table is not ready yet. Run supabase/schema.sql.</div>';return}
+  if(!n.data?.length){noticeList.innerHTML='<div class="notification">No notices collected yet. The daily Vercel job will populate this panel.</div>';return}
+  noticeList.innerHTML=n.data.map(x=>`<div class="notification ${read.has(x.id)?"":"unread"}"><b>${esc(x.title)}</b><div class="muted">${esc(x.source)} · ${new Date(x.detected_at).toLocaleString("en-IN")}</div>${(x.matched_courses||[]).map(c=>`<span class="notice-course">${esc(c)}</span>`).join("")}<br><a target="_blank" href="${encodeURI(x.url)}">Open official source ↗</a> ${read.has(x.id)?"<span class='muted'>· Read</span>":`<button class="btn" onclick="markRead('${x.id}')">MARK READ</button>`}</div>`).join("");
+}
+async function markRead(id){await sb.from("notification_reads").upsert({user_id:user.id,notification_id:id,read_at:new Date().toISOString()});await renderNotifications()}
+init();
 </script>
 </body>
 </html>
